@@ -13,18 +13,18 @@ def retrieve_contact_id_and_company(data):
     get_resp = requests.get(url=contact_url, headers=headers)
     r_json = get_resp.json()
     if get_resp.ok:
-         # contact already exists
-         vid = r_json['vid']
-         company = r_json['associated-company']['properties']['name']['value']
-         return {"status": 200, "contact_id": vid, "company_name": company}
+        # contact already exists
+        vid = r_json['vid']
+        company = r_json['associated-company']['properties']['name']['value']
+        return {"status": 200, "contact_id": vid, "company_name": company}
     if get_resp.status_code == 404:
-         # contact doesn't exist yet
-         vid = create_hubspot_contact(data)
-         company = retrieve_company_name_from_hubspot(vid, hubspot_api_key)
-         if company:
+        # contact doesn't exist yet
+        vid = create_hubspot_contact(data)
+        company = retrieve_company_name_from_hubspot(vid, hubspot_api_key)
+        if company:
             return {"status": 200, "contact_id": vid, "company_name": company}
-         return {"status": 400,
-            "message": "could not retrieve company name from Hubspot"}
+        return {"status": 400,
+                "message": "could not retrieve company name from Hubspot"}
     return {"status": get_resp.status_code, "message": r_json['message']}
 
 
@@ -38,8 +38,8 @@ def create_hubspot_contact(data):
             {"property": "lastname", "value": data["lastname"]},
             {"property": "phone", "value": data["phone"]},
             {"property": "by_downloading_cloudify_you_agree_to_the_cloudify_"
-                      "end_user_license_agreement",
-            "value": data["is_eula"]},
+                         "end_user_license_agreement",
+             "value": data["is_eula"]},
         ]
     }
     post_resp = requests.post(data=json.dumps(payload), url=create_url,
