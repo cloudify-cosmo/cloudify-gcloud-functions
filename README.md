@@ -8,3 +8,6 @@ From a function's directory:
 
 * `<function>` = name of the function that will be deployed on Google Cloud
 * `<entry_point>` = name of the method inside the function's main/index file which serves as the entry-point for running the function
+
+**Note:**
+cloudifyHubspotContactUsage is a scheduled function, and expects `--trigger-topic CONTACT_USAGE`
