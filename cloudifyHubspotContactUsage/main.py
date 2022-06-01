@@ -1,4 +1,5 @@
 import json
+import time
 import requests
 
 from google.cloud import bigquery
@@ -34,10 +35,12 @@ def update_hubspot_contact(data):
     }
     post_resp = requests.post(data=json.dumps(payload), url=url,
                               headers={'Content-Type': 'application/json'})
+    error_message = ""
     print("{}: {}".format(post_resp.status_code, data["hubspot_id"]))
     if not post_resp.ok:
         print("Error on sent data: {}".format(data))
-    return post_resp.status_code
+        error_message = post_resp.json().get('message')
+    return post_resp.status_code, error_message, payload
 
 
 def query_data_usage():
@@ -82,6 +85,7 @@ def query_data_usage():
     )
     query_results = query.result()  # Waits for job to complete.
     result = {}
+    sync_data = []
     for row in query_results:
         payload = {
             "hubspot_id": row.hubspot_id,
@@ -100,7 +104,39 @@ def query_data_usage():
             "Kubernetes": row.kubernetes_node_types,
             "Terraform": row.terraform_node_types,
         }
-        result[row.hubspot_id] = update_hubspot_contact(payload)
+        status_code, error_message, raw_request = \
+            update_hubspot_contact(payload)
+        result[row.hubspot_id] = status_code
+
+        sync_data.append({
+            "sync_timestamp": f"{time.time():.0f}",
+            "contact_id": payload["hubspot_id"],
+            "status": str(status_code),
+            "error_message": error_message,
+            "property_first_login": payload["first_login"],
+            "property_last_login": payload["last_login"],
+            "property_Tenants": payload["tenants"],
+            "property_Users": payload["users"],
+            "property_Blueprints": payload["blueprints"],
+            "property_Deployments": payload["deployments"],
+            "property_Executions": payload["executions"],
+            "property_Secrets": payload["secrets"],
+            "property_AWS": payload["AWS"],
+            "property_GCP": payload["GCP"],
+            "property_Azure": payload["Azure"],
+            "property_Helm": payload["Helm"],
+            "property_Kubernetes": payload["Kubernetes"],
+            "property_Terraform": payload["Terraform"],
+            "raw_request": raw_request,
+        })
+
+    # persist data sent to Hubspot in a dedicated table
+    client = bigquery.Client()
+    table_id = bigquery.Table.from_string(
+        "omer-tenant.cloudify_usage.hubspot_usage_sync")
+    table = client.get_table(table_id)
+    client.insert_rows_json(table, sync_data)  # API request
+
     return result
 
 

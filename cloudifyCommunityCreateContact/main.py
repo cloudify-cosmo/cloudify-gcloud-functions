@@ -50,7 +50,7 @@ def create_hubspot_contact(data):
     return r_json['vid']
 
 
-@retrying.retry(wait_fixed=300, stop_max_attempt_number=15)
+@retrying.retry(wait_fixed=500, stop_max_attempt_number=120)
 def retrieve_company_name_from_hubspot(vid, api_key):
     url = 'https://api.hubapi.com/contacts/v1/contact/vid/{}/' \
           'profile?hapikey={}'.format(vid, api_key)
