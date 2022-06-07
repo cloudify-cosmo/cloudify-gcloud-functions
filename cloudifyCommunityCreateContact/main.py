@@ -1,13 +1,14 @@
+import os
 import json
 import requests
 import retrying
 
-hubspot_api_key = "b800751d-61fc-42b7-8620-a55219976d43"
 headers = {'Content-Type': 'application/json'}
 
 
 def retrieve_contact_id_and_company(data):
     # try to get contact by email
+    hubspot_api_key = os.environ['hubspot_api_key']
     contact_url = 'https://api.hubapi.com/contacts/v1/contact/email/{}/' \
                'profile?hapikey={}'.format(data["email"], hubspot_api_key)
     get_resp = requests.get(url=contact_url, headers=headers)
@@ -29,6 +30,7 @@ def retrieve_contact_id_and_company(data):
 
 
 def create_hubspot_contact(data):
+    hubspot_api_key = os.environ['hubspot_api_key']
     create_url = "https://api.hubapi.com/contacts/v1/contact/?" \
                  "hapikey={}".format(hubspot_api_key)
     payload = {

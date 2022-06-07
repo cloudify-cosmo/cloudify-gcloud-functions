@@ -1,14 +1,15 @@
+import os
 import json
 import time
 import requests
 
 from google.cloud import bigquery
 
-hubspot_api_key = "b800751d-61fc-42b7-8620-a55219976d43"
 hubspot_api_base_url = "https://api.hubapi.com/contacts/v1/contact/vid/"
 
 
 def update_hubspot_contact(data):
+    hubspot_api_key = os.environ['hubspot_api_key']
     url = "https://api.hubapi.com/contacts/v1/contact/vid/{}/" \
           "profile?hapikey={}".format(data["hubspot_id"], hubspot_api_key)
 
