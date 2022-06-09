@@ -5,8 +5,6 @@ import requests
 
 from google.cloud import bigquery
 
-hubspot_api_base_url = "https://api.hubapi.com/contacts/v1/contact/vid/"
-
 
 def update_hubspot_contact(data):
     hubspot_api_key = os.environ['hubspot_api_key']
