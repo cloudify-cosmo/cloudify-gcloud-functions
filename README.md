@@ -9,5 +9,8 @@ From a function's directory:
 * `<function>` = name of the function that will be deployed on Google Cloud
 * `<entry_point>` = name of the method inside the function's main/index file which serves as the entry-point for running the function
 
-**Note:**
-cloudifyHubspotContactUsage is a scheduled function, and expects `--trigger-topic CONTACT_USAGE`
+#### Notes:
+* **cloudifyHubspotContactUsage** is a scheduled function, and expects --trigger-topic CONTACT_USAGE`
+* the Hubspot functions expect a secret `hubspot_api_key` to be enabled for 
+  the function as an environment variable. See [here](https://cloud.google.com/functions/docs/configuring/secrets) 
+  on how to do it.
