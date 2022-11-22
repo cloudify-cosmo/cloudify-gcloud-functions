@@ -3,7 +3,7 @@ import json
 import requests
 import retrying
 
-headers = {'Content-Type': 'application/json', 'authorization': 'Bearer %s' % os.environ('hubspot_pat')}
+headers = {'Content-Type': 'application/json', 'authorization': 'Bearer %s' % os.environ['hubspot_pat']}
 
 
 def retrieve_contact_id_and_company(data):
@@ -44,7 +44,7 @@ def create_hubspot_contact(data):
         ]
     }
     post_resp = requests.post(data=json.dumps(payload), url=create_url,
-                              headers={'Content-Type': 'application/json', 'authorization': 'Bearer %s' % hubspot_pat})
+                              headers=headers)
     r_json = post_resp.json()
     if not post_resp.ok:
         return {"status": post_resp.status_code, "message": r_json['message']}
@@ -55,7 +55,7 @@ def create_hubspot_contact(data):
 def retrieve_company_name_from_hubspot(vid, hubspot_pat):
     url = 'https://api.hubapi.com/contacts/v1/contact/vid/{}/' \
           'profile'.format(vid)
-    resp = requests.get(url=url, headers={'Content-Type': 'application/json', 'authorization': 'Bearer %s' % hubspot_pat})
+    resp = requests.get(url=url, headers=headers)
     if not resp.ok:
         return
     associated_company = resp.json()['associated-company']
