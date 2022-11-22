@@ -3,14 +3,14 @@ import json
 import requests
 import retrying
 
-headers = {'Content-Type': 'application/json'}
+headers = {'Content-Type': 'application/json', 'authorization': 'Bearer %s' % os.environ['hubspot_pat']}
 
 
 def retrieve_contact_id_and_company(data):
     # try to get contact by email
-    hubspot_api_key = os.environ['hubspot_api_key']
+    hubspot_pat = os.environ['hubspot_pat']
     contact_url = 'https://api.hubapi.com/contacts/v1/contact/email/{}/' \
-               'profile?hapikey={}'.format(data["email"], hubspot_api_key)
+               'profile'.format(data["email"])
     get_resp = requests.get(url=contact_url, headers=headers)
     r_json = get_resp.json()
     if get_resp.ok:
@@ -21,7 +21,7 @@ def retrieve_contact_id_and_company(data):
     if get_resp.status_code == 404:
         # contact doesn't exist yet
         vid = create_hubspot_contact(data)
-        company = retrieve_company_name_from_hubspot(vid, hubspot_api_key)
+        company = retrieve_company_name_from_hubspot(vid, hubspot_pat)
         if company:
             return {"status": 200, "contact_id": vid, "company_name": company}
         return {"status": 400,
@@ -30,9 +30,8 @@ def retrieve_contact_id_and_company(data):
 
 
 def create_hubspot_contact(data):
-    hubspot_api_key = os.environ['hubspot_api_key']
-    create_url = "https://api.hubapi.com/contacts/v1/contact/?" \
-                 "hapikey={}".format(hubspot_api_key)
+    hubspot_pat = os.environ['hubspot_pat']
+    create_url = "https://api.hubapi.com/contacts/v1/contact"
     payload = {
         "properties": [
             {"property": "email", "value": data["email"]},
@@ -45,7 +44,7 @@ def create_hubspot_contact(data):
         ]
     }
     post_resp = requests.post(data=json.dumps(payload), url=create_url,
-                              headers={'Content-Type': 'application/json'})
+                              headers=headers)
     r_json = post_resp.json()
     if not post_resp.ok:
         return {"status": post_resp.status_code, "message": r_json['message']}
@@ -53,10 +52,10 @@ def create_hubspot_contact(data):
 
 
 @retrying.retry(wait_fixed=500, stop_max_attempt_number=120)
-def retrieve_company_name_from_hubspot(vid, api_key):
+def retrieve_company_name_from_hubspot(vid, hubspot_pat):
     url = 'https://api.hubapi.com/contacts/v1/contact/vid/{}/' \
-          'profile?hapikey={}'.format(vid, api_key)
-    resp = requests.get(url=url, headers={'Content-Type': 'application/json'})
+          'profile'.format(vid)
+    resp = requests.get(url=url, headers=headers)
     if not resp.ok:
         return
     associated_company = resp.json()['associated-company']

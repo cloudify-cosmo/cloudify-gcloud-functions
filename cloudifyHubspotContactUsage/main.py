@@ -7,9 +7,9 @@ from google.cloud import bigquery
 
 
 def update_hubspot_contact(data):
-    hubspot_api_key = os.environ['hubspot_api_key']
+    hubspot_pat = os.environ['hubspot_pat']
     url = "https://api.hubapi.com/contacts/v1/contact/vid/{}/" \
-          "profile?hapikey={}".format(data["hubspot_id"], hubspot_api_key)
+          "profile".format(data["hubspot_id"])
 
     first_login_ts = data["first_login"].isoformat()
     last_login_ts = data["last_login"].isoformat()
@@ -33,7 +33,7 @@ def update_hubspot_contact(data):
         ]
     }
     post_resp = requests.post(data=json.dumps(payload), url=url,
-                              headers={'Content-Type': 'application/json'})
+                              headers={'Content-Type': 'application/json', 'authorization': 'Bearer %s' % hubspot_pat})
     error_message = ""
     print("{}: {}".format(post_resp.status_code, data["hubspot_id"]))
     if not post_resp.ok:
